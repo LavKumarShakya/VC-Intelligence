@@ -1,12 +1,13 @@
 import { EnrichmentResult } from "@/types";
-import { Sparkles, CheckCircle2, TrendingUp, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { Sparkles, CheckCircle2, TrendingUp, Link as LinkIcon, ExternalLink, Download } from "lucide-react";
 import { Badge } from "../ui/Badge";
 import { Skeleton } from "../ui/Skeleton";
-import { formatDate } from "@/lib/utils";
+import { formatDate, downloadCSV, downloadJSON } from "@/lib/utils";
+import { Button } from "../ui/Button";
 
 interface EnrichmentSectionProps {
     isLoading: boolean;
-    data: EnrichmentResult | null;
+    data: any | null;
 }
 
 export function EnrichmentSection({ isLoading, data }: EnrichmentSectionProps) {
@@ -61,14 +62,45 @@ export function EnrichmentSection({ isLoading, data }: EnrichmentSectionProps) {
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
             <div className="relative">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div className="flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-primary" />
                         <h2 className="text-lg font-semibold text-text-main tracking-tight">AI Enrichment</h2>
+                        <span className="text-xs text-text-muted bg-background px-2 py-1 rounded-md ml-2 hidden sm:inline-block">
+                            Synthesized {formatDate(data.enrichedAt || new Date().toISOString())}
+                        </span>
                     </div>
-                    <span className="text-xs text-text-muted bg-background px-2 py-1 rounded-md">
-                        Synthesized {formatDate(data.enrichedAt)}
-                    </span>
+
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs px-3"
+                            onClick={() => downloadJSON(data, "enrichment-data")}
+                        >
+                            <Download className="w-3.5 h-3.5 mr-1.5" />
+                            JSON
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs px-3"
+                            onClick={() => {
+                                // Formatting the nested array data into a flatter structure for CSV
+                                const flatData = [{
+                                    Summary: data.summary,
+                                    "What They Do": (data.whatTheyDo || []).join("; "),
+                                    Keywords: (data.keywords || []).join(", "),
+                                    Signals: (data.signals || data.derivedSignals || []).join("; "),
+                                    Sources: (data.sources || []).map((s: any) => `${s.url} [Status: ${s.status}]`).join(", ")
+                                }];
+                                downloadCSV(flatData, "enrichment-data");
+                            }}
+                        >
+                            <Download className="w-3.5 h-3.5 mr-1.5" />
+                            CSV
+                        </Button>
+                    </div>
                 </div>
 
                 <p className="text-sm text-text-main leading-relaxed mb-8">
@@ -82,7 +114,7 @@ export function EnrichmentSection({ isLoading, data }: EnrichmentSectionProps) {
                             What They Do
                         </h3>
                         <ul className="space-y-2">
-                            {data.whatTheyDo.map((item, i) => (
+                            {(data.whatTheyDo || []).map((item: string, i: number) => (
                                 <li key={i} className="text-sm text-text-muted flex items-start">
                                     <span className="text-primary mr-2 mt-0.5">•</span>
                                     {item}
@@ -97,7 +129,7 @@ export function EnrichmentSection({ isLoading, data }: EnrichmentSectionProps) {
                             Derived Signals
                         </h3>
                         <div className="flex flex-wrap gap-2">
-                            {data.derivedSignals.map((signal, i) => (
+                            {(data.signals || data.derivedSignals || []).map((signal: string, i: number) => (
                                 <Badge key={i} variant="purple">{signal}</Badge>
                             ))}
                         </div>
@@ -109,7 +141,7 @@ export function EnrichmentSection({ isLoading, data }: EnrichmentSectionProps) {
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Keywords</span>
                             <div className="flex flex-wrap gap-1.5">
-                                {data.keywords.map((kw, i) => (
+                                {(data.keywords || []).map((kw: string, i: number) => (
                                     <span key={i} className="text-xs text-text-muted bg-background border border-border px-2 py-0.5 rounded-md">
                                         {kw}
                                     </span>
@@ -123,14 +155,17 @@ export function EnrichmentSection({ isLoading, data }: EnrichmentSectionProps) {
                                 Sources
                             </span>
                             <div className="flex gap-2">
-                                {data.sources.map((source, i) => (
+                                {(data.sources || []).map((source: any, i: number) => (
                                     <a
                                         key={i}
                                         href={source.url}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="w-6 h-6 rounded bg-background border border-border flex items-center justify-center text-text-muted hover:text-primary hover:border-primary transition-colors"
-                                        title={new URL(source.url).hostname}
+                                        className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${source.success
+                                            ? "bg-primary/5 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary"
+                                            : "bg-background border-border/50 text-text-muted/50 hover:text-text-muted hover:border-border"
+                                            }`}
+                                        title={`${source.url} - ${source.success ? "Success" : `Failed (${source.status})`}`}
                                     >
                                         <ExternalLink className="w-3 h-3" />
                                     </a>

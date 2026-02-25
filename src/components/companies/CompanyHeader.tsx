@@ -1,4 +1,4 @@
-import { ArrowLeft, ExternalLink, BookmarkPlus, Sparkles } from "lucide-react";
+import { ArrowLeft, ExternalLink, BookmarkPlus, BookmarkCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Company } from "@/types";
 import { Badge } from "../ui/Badge";
@@ -10,9 +10,10 @@ interface CompanyHeaderProps {
     onEnrich: () => void;
     isEnriching: boolean;
     hasEnriched: boolean;
+    isSaved: boolean;
 }
 
-export function CompanyHeader({ company, onSave, onEnrich, isEnriching, hasEnriched }: CompanyHeaderProps) {
+export function CompanyHeader({ company, onSave, onEnrich, isEnriching, hasEnriched, isSaved }: CompanyHeaderProps) {
     return (
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 py-6 border-b border-border">
             <div className="flex items-start gap-4">
@@ -38,19 +39,32 @@ export function CompanyHeader({ company, onSave, onEnrich, isEnriching, hasEnric
             </div>
 
             <div className="flex items-center gap-3">
-                <Button variant="secondary" onClick={onSave} className="w-full md:w-auto">
-                    <BookmarkPlus className="w-4 h-4 mr-2" />
-                    Save to List
+                <Button
+                    variant={isSaved ? "outline" : "secondary"}
+                    onClick={onSave}
+                    className={`w-full md:w-auto ${isSaved ? "opacity-75" : ""}`}
+                    disabled={isSaved}
+                >
+                    {isSaved ? (
+                        <>
+                            <BookmarkCheck className="w-4 h-4 mr-2 text-primary" />
+                            Saved to List
+                        </>
+                    ) : (
+                        <>
+                            <BookmarkPlus className="w-4 h-4 mr-2" />
+                            Save to List
+                        </>
+                    )}
                 </Button>
                 <Button
                     variant={hasEnriched ? "secondary" : "primary"}
                     onClick={onEnrich}
                     isLoading={isEnriching}
-                    disabled={hasEnriched}
                     className="w-full md:w-auto min-w-[120px]"
                 >
                     {!isEnriching && <Sparkles className="w-4 h-4 mr-2" />}
-                    {hasEnriched ? "Enriched" : "Enrich"}
+                    {hasEnriched ? "Re-Enrich" : "Enrich"}
                 </Button>
             </div>
         </div>

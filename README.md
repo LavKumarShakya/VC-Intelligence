@@ -21,6 +21,12 @@ This application is strictly frontend-only, demonstrating complex state manageme
 - **Dark Mode**: Top-level theme toggle that syncs with `localStorage` and falls back to system preferences.
 - **Custom UI System**: Built from scratch using Tailwind CSS, including sortable tables, responsive sidebars, skeleton loaders, custom toasts, and modals.
 
+## Backend Scope Constraints (MVP)
+
+> [!IMPORTANT]
+> The enrichment pipeline strictly uses official website content only, in accordance with MVP scope defined in the assignment.
+> It does not crawl external sources, GitHub, social platforms, or perform web searches. All signals and summaries are derived solely from the provided domain. It enforces strict origin checking and caps scraping to a maximum of 3 pages or 12,000 characters.
+
 ## Getting Started
 
 1. **Install dependencies**:
@@ -29,12 +35,18 @@ This application is strictly frontend-only, demonstrating complex state manageme
    ```
    *(Note: uses standard `npm`)*
 
-2. **Run the development server**:
+2. **Configure Environment Variables**:
+   Create a `.env.local` file in the root directory and add your Google Gemini API key:
+   ```env
+   GEMINI_API_KEY=your_actual_key_here
+   ```
+
+3. **Run the development server**:
    ```bash
    npm run dev
    ```
 
-3. **Open application**:
+4. **Open application**:
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## Design Guidelines

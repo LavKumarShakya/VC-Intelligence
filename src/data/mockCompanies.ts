@@ -3,33 +3,50 @@ import { Company, EnrichmentResult } from "@/types";
 export const MOCK_COMPANIES: Company[] = [
     {
         id: "comp-1",
-        name: "Aether AI",
+        name: "Aether Labs",
         industry: "Artificial Intelligence",
         stage: "Series A",
         location: "San Francisco, CA",
-        website: "https://aether-ai.example.com",
-        description: "Generative AI platform for automated software testing and debugging, reducing QA cycles by 80%.",
+        website: "https://aetherlabs.ai",
+        description:
+            "AI-powered platform for automated code review and test generation, helping engineering teams reduce QA cycles.",
         founded: 2022,
-        signalsCount: 12,
-        lastEnriched: "2023-10-15T08:30:00Z",
+        signalsCount: 6,
+        lastEnriched: "2024-01-15T08:30:00Z",
         signals: [
-            { id: "sig-1-1", date: "2023-09-01", type: "Key Hire", description: "Hired former VP of Engineering from Stripe." },
-            { id: "sig-1-2", date: "2023-10-10", type: "Product Launch", description: "Launched Aether 2.0 with agentic capabilities." }
+            {
+                id: "sig-1-1",
+                date: "2024-01-10",
+                type: "Funding",
+                description: "Raised $12M Series A led by Accel."
+            },
+            {
+                id: "sig-1-2",
+                date: "2023-12-01",
+                type: "Product Launch",
+                description: "Released AI Test Agent v2 with CI/CD integrations."
+            }
         ]
     },
     {
         id: "comp-2",
-        name: "Nexus Health",
+        name: "Nexus Health Systems",
         industry: "Healthcare Tech",
         stage: "Series B",
         location: "Boston, MA",
-        website: "https://nexushealth.example.com",
-        description: "Interoperability layer for hospital EHR systems, making patient data accessible securely across providers.",
+        website: "https://nexushealth.io",
+        description:
+            "Interoperability platform connecting hospital EHR systems to enable secure cross-provider patient data exchange.",
         founded: 2020,
-        signalsCount: 8,
+        signalsCount: 9,
         lastEnriched: null,
         signals: [
-            { id: "sig-2-1", date: "2023-08-15", type: "Partnership", description: "Signed Mayo Clinic as enterprise customer." }
+            {
+                id: "sig-2-1",
+                date: "2023-11-20",
+                type: "Enterprise Deal",
+                description: "Signed multi-year agreement with a 12-hospital network."
+            }
         ]
     },
     {
@@ -38,14 +55,19 @@ export const MOCK_COMPANIES: Company[] = [
         industry: "Fintech",
         stage: "Seed",
         location: "New York, NY",
-        website: "https://quantumledger.example.com",
-        description: "Post-quantum cryptographic ledger for institutional cross-border settlements.",
+        website: "https://quantumledger.io",
+        description:
+            "Post-quantum cryptography infrastructure for secure cross-border financial settlements.",
         founded: 2023,
-        signalsCount: 24,
-        lastEnriched: "2023-10-20T14:45:00Z",
+        signalsCount: 4,
+        lastEnriched: "2024-01-20T14:45:00Z",
         signals: [
-            { id: "sig-3-1", date: "2023-10-15", type: "Funding", description: "Raised $4M Seed round led by a16z." },
-            { id: "sig-3-2", date: "2023-10-18", type: "Traction", description: "Hit $100M in processed transaction volume." }
+            {
+                id: "sig-3-1",
+                date: "2024-01-05",
+                type: "Funding",
+                description: "Closed $4.2M Seed round led by early-stage fintech investors."
+            }
         ]
     },
     {
@@ -54,23 +76,25 @@ export const MOCK_COMPANIES: Company[] = [
         industry: "Climate Tech",
         stage: "Series C",
         location: "Austin, TX",
-        website: "https://ecologix.example.com",
-        description: "Supply chain visibility platform tracking Scope 3 carbon emissions for physical goods.",
+        website: "https://ecologix.com",
+        description:
+            "Supply chain emissions intelligence platform helping enterprises track Scope 3 carbon impact.",
         founded: 2018,
-        signalsCount: 5,
-        lastEnriched: "2023-09-01T09:15:00Z",
+        signalsCount: 12,
+        lastEnriched: "2024-01-05T09:15:00Z",
         signals: []
     },
     {
         id: "comp-5",
-        name: "Synthetica",
+        name: "Synthetica Bio",
         industry: "Biotech",
         stage: "Series A",
         location: "San Diego, CA",
-        website: "https://synthetica.example.com",
-        description: "AI-driven discovery of novel protein structures for targeted therapeutics.",
+        website: "https://syntheticabio.com",
+        description:
+            "AI-driven protein engineering platform accelerating therapeutic discovery pipelines.",
         founded: 2021,
-        signalsCount: 15,
+        signalsCount: 7,
         lastEnriched: null,
         signals: []
     },
@@ -80,13 +104,19 @@ export const MOCK_COMPANIES: Company[] = [
         industry: "Developer Tools",
         stage: "Seed",
         location: "Remote",
-        website: "https://vortexdata.example.com",
-        description: "Streaming database for real-time analytics with sub-millisecond latency on standard hardware.",
+        website: "https://vortexdata.dev",
+        description:
+            "Streaming database optimized for real-time analytics workloads with sub-second query latency.",
         founded: 2023,
-        signalsCount: 32,
-        lastEnriched: "2023-10-22T11:20:00Z",
+        signalsCount: 10,
+        lastEnriched: "2024-01-22T11:20:00Z",
         signals: [
-            { id: "sig-6-1", date: "2023-10-20", type: "GitHub Traction", description: "Reached 10,000 GitHub stars." }
+            {
+                id: "sig-6-1",
+                date: "2024-01-15",
+                type: "Open Source Growth",
+                description: "Reached 8,500 GitHub stars."
+            }
         ]
     },
     {
@@ -95,11 +125,12 @@ export const MOCK_COMPANIES: Company[] = [
         industry: "Cybersecurity",
         stage: "Series B",
         location: "Tel Aviv, Israel",
-        website: "https://lumina-sec.example.com",
-        description: "Cloud identity entitlement management (CIEM) platform neutralizing over-privileged service accounts.",
+        website: "https://luminasecurity.io",
+        description:
+            "Cloud identity security platform preventing privilege escalation and over-permissioned access.",
         founded: 2019,
-        signalsCount: 9,
-        lastEnriched: "2023-08-30T16:00:00Z",
+        signalsCount: 11,
+        lastEnriched: "2023-12-30T16:00:00Z",
         signals: []
     },
     {
@@ -108,10 +139,11 @@ export const MOCK_COMPANIES: Company[] = [
         industry: "Aerospace",
         stage: "Series A",
         location: "Los Angeles, CA",
-        website: "https://aerostack.example.com",
-        description: "Modular operating system for low-earth orbit satellite constellations.",
+        website: "https://aerostack.space",
+        description:
+            "Modular operating software powering low-earth orbit satellite constellations.",
         founded: 2021,
-        signalsCount: 7,
+        signalsCount: 5,
         lastEnriched: null,
         signals: []
     },
@@ -121,13 +153,19 @@ export const MOCK_COMPANIES: Company[] = [
         industry: "Fintech",
         stage: "Growth",
         location: "London, UK",
-        website: "https://flowpay.example.com",
-        description: "Unified API for global payroll and employer-of-record services.",
+        website: "https://flowpay.co",
+        description:
+            "Unified API for global payroll infrastructure and employer-of-record services.",
         founded: 2016,
-        signalsCount: 45,
-        lastEnriched: "2023-10-18T10:00:00Z",
+        signalsCount: 22,
+        lastEnriched: "2024-01-18T10:00:00Z",
         signals: [
-            { id: "sig-9-1", date: "2023-09-25", type: "Expansion", description: "Opened operations in 15 new countries in APAC." }
+            {
+                id: "sig-9-1",
+                date: "2023-12-12",
+                type: "Expansion",
+                description: "Expanded operations into Southeast Asia."
+            }
         ]
     },
     {
@@ -136,39 +174,15 @@ export const MOCK_COMPANIES: Company[] = [
         industry: "AgTech",
         stage: "Series A",
         location: "Denver, CO",
-        website: "https://robofarms.example.com",
-        description: "Autonomous drone fleets for ultra-precise crop spraying and yield analysis.",
+        website: "https://robofarms.ai",
+        description:
+            "Autonomous drone systems providing precision agriculture insights and crop health analytics.",
         founded: 2020,
-        signalsCount: 11,
-        lastEnriched: "2023-07-12T13:30:00Z",
-        signals: []
-    },
-    {
-        id: "comp-11",
-        name: "NeuroSync",
-        industry: "Healthcare Tech",
-        stage: "Seed",
-        location: "San Francisco, CA",
-        website: "https://neurosync.example.com",
-        description: "Non-invasive brain-computer interfaces for remote patient monitoring of neurological conditions.",
-        founded: 2023,
-        signalsCount: 18,
-        lastEnriched: null,
-        signals: []
-    },
-    {
-        id: "comp-12",
-        name: "GridConnect",
-        industry: "Climate Tech",
-        stage: "Public",
-        location: "Chicago, IL",
-        website: "https://gridconnect.example.com",
-        description: "Smart grid management software optimizing dispersed renewable energy assets.",
-        founded: 2010,
-        signalsCount: 88,
-        lastEnriched: "2023-10-24T09:45:00Z",
+        signalsCount: 6,
+        lastEnriched: "2023-12-01T13:30:00Z",
         signals: []
     }
+
 ];
 
 export const MOCK_ENRICHMENT_DATA: Record<string, EnrichmentResult> = {

@@ -10,7 +10,7 @@ import { OverviewCard } from "@/components/companies/OverviewCard";
 import { SignalsTimeline } from "@/components/companies/SignalsTimeline";
 import { NotesSection } from "@/components/companies/NotesSection";
 import { EnrichmentSection } from "@/components/companies/EnrichmentSection";
-import { MOCK_COMPANIES, getEnrichmentData } from "@/data/mockCompanies";
+import { MOCK_COMPANIES } from "@/data/mockCompanies";
 import { Company, EnrichmentResult, CompanyList } from "@/types";
 import { StorageUtility } from "@/lib/storage";
 
@@ -23,6 +23,7 @@ export default function CompanyProfilePage({ params }: { params: Promise<{ id: s
     const [company, setCompany] = useState<Company | null>(null);
     const [enrichmentData, setEnrichmentData] = useState<EnrichmentResult | null>(null);
     const [isEnriching, setIsEnriching] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
 
     useEffect(() => {
         // Find company from mock
@@ -36,6 +37,11 @@ export default function CompanyProfilePage({ params }: { params: Promise<{ id: s
         if (cachedEnrichment) {
             setEnrichmentData(cachedEnrichment);
         }
+
+        // Check save status
+        const lists = StorageUtility.getItem<CompanyList[]>("vc-lists") || [];
+        const isCompanySaved = lists.some(list => list.companyIds.includes(id as string));
+        setIsSaved(isCompanySaved);
     }, [id]);
 
     if (!company) {
@@ -69,6 +75,7 @@ export default function CompanyProfilePage({ params }: { params: Promise<{ id: s
 
         defaultList.companyIds.push(company.id);
         StorageUtility.setItem("vc-lists", lists);
+        setIsSaved(true);
         toast(`Saved ${company.name} to "Default Data List"`, "success");
     };
 
@@ -77,12 +84,28 @@ export default function CompanyProfilePage({ params }: { params: Promise<{ id: s
         toast(`Enriching data for ${company.name}...`, "info", 1500);
 
         try {
-            const data = await getEnrichmentData(company.id);
-            setEnrichmentData(data);
-            StorageUtility.setItem(`vc-enrichment-${company.id}`, data);
+            const response = await fetch("/api/enrich", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ companyId: company.id, website: company.website }),
+            });
+
+            const resData = await response.json();
+
+            if (!response.ok) {
+                // Fallback error based on specific status codes mapped from the backend plan
+                const errorMessage = resData.error ||
+                    (response.status === 429 ? "Rate limit exceeded." :
+                        response.status === 502 ? "Upstream AI service unavailable." :
+                            "Failed to extract structured enrichment data.");
+                throw new Error(errorMessage);
+            }
+
+            setEnrichmentData(resData);
+            StorageUtility.setItem(`vc-enrichment-${company.id}`, resData);
             toast("Enrichment complete", "success");
-        } catch (error) {
-            toast("Failed to enrich company data", "warning");
+        } catch (error: any) {
+            toast(error.message || "Failed to enrich company data", "warning");
         } finally {
             setIsEnriching(false);
         }
@@ -103,6 +126,7 @@ export default function CompanyProfilePage({ params }: { params: Promise<{ id: s
                 onEnrich={handleEnrich}
                 isEnriching={isEnriching}
                 hasEnriched={!!enrichmentData}
+                isSaved={isSaved}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

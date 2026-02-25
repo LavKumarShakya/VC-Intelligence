@@ -44,3 +44,22 @@ export function downloadCSV(data: any[], filename: string) {
     link.click();
     document.body.removeChild(link);
 }
+
+/**
+ * Generates and downloads a JSON file from an object
+ */
+export function downloadJSON(data: any, filename: string) {
+    if (!data) return;
+
+    const jsonContent = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${filename}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
