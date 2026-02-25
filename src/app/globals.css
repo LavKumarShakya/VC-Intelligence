@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+
+  --color-border: var(--border);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  --font-sans: var(--font-primary), "Inter", system-ui, sans-serif;
+
+  --radius-xl: 1rem;
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+
+  --shadow-soft: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 12px -4px rgba(0, 0, 0, 0.08);
+}
+
+/* Setup variables for Light Mode */
+:root {
+  --background: #F4F7F1;
+  --surface: #FFFFFF;
+  --primary: #375534;
+  --primary-hover: #0F2A1D;
+  --accent: #6B9071;
+  --text-main: #0F2A1D;
+  --text-muted: #6B9071;
+  --border: #AEC3B0;
+  --success: #10B981;
+  --warning: #F59E0B;
+}
+
+/* Setup variables for Dark Mode */
+.dark {
+  --background: #0F2A1D;
+  --surface: #1E382A;
+  --primary: #6B9071;
+  --primary-hover: #AEC3B0;
+  --accent: #AEC3B0;
+  --text-main: #E3EED4;
+  --text-muted: #8AA890;
+  --border: #375534;
+  --success: #10B981;
+  --warning: #F59E0B;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-main);
+  @apply antialiased transition-colors duration-200;
+}
+
+/* Custom Scrollbar for a premium feel */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
