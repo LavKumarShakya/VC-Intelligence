@@ -1,50 +1,35 @@
-# VC Intelligence
+# VC Intelligence Interface with Live AI Enrichment
 
-A structured discovery and enrichment interface for analyzing startup companies. Users can search, filter, and view company profiles, then trigger AI-driven enrichment that scrapes only the official company website and returns structured data.
+A production-style SaaS interface that simulates how venture capital firms discover, analyze, and track startup companies — built as an intern take-home assignment.
 
-This project is intentionally scoped as an MVP per assignment constraints.
+The system follows a structured workflow:
 
----
+**Discover → View Profile → Enrich with Live Data → Derive Insights → Save to Lists**
 
-## Project Overview
-
-**Core Workflow:**
-
-`Discover → Open Profile → Enrich → Analyze → Save`
-
-- Browse a searchable, filterable, sortable company directory
-- View individual company profiles with signals and notes
-- Trigger live AI enrichment from the company's official website
-- Organize companies into custom lists with JSON/CSV export
-- Save and re-run search queries
+It uses a mock company dataset for fast discovery, real-time enrichment from public websites, and AI-powered structured extraction to surface actionable intelligence.
 
 ---
 
-## Tech Stack
+## Live Demo
 
-### Frontend
-
-| Technology | Purpose |
-|---|---|
-| Next.js 14 (App Router) | Framework, routing, SSR |
-| TypeScript | Type safety |
-| Tailwind CSS | Styling |
-| Lucide React | Icon library |
-| localStorage | Client-side persistence |
-
-### Backend
-
-| Technology | Purpose |
-|---|---|
-| Next.js API Routes | Serverless endpoint |
-| Cheerio | HTML parsing and sanitization |
-| `@google/genai` | Gemini 2.5 Flash LLM |
-| Zod | Runtime schema validation |
-| In-memory Map | Rate limiting and caching |
+🔗 [Deployed Application](https://vc-intelligence-psi.vercel.app/companies)
 
 ---
 
-## Architecture
+## Key Features
+
+- **Search & Filter** — Browse companies by industry, stage, and location with sortable columns and pagination
+- **Company Profiles** — View company metadata, business signals, and private notes
+- **Save to Lists** — Organize companies into custom lists with JSON/CSV export
+- **Saved Searches** — Persist and re-run search queries across sessions
+- **Live Enrichment** — Trigger real-time AI analysis from the company's official public website
+- **Structured Output** — Receive a summary, bullet points, keywords, and derived business signals
+- **Source Transparency** — Every scraped URL is logged with HTTP status, success flag, and timestamp
+- **Local Caching** — Enrichment results are cached for 10 minutes to reduce redundant API calls
+
+---
+
+## Enrichment Pipeline
 
 ```
 Frontend (React)
@@ -53,189 +38,167 @@ Frontend (React)
 POST /api/enrich
        │
        ▼
-Security Validation (SSRF + Rate Limit)
+Input Validation + SSRF Protection + Rate Limiting
        │
        ▼
-Cache Check ──── HIT ──→ Return cached JSON
+Cache Check ─── HIT ──→ Return cached result (<100ms)
        │
       MISS
        │
        ▼
-Scraper (official website only)
+Public Page Fetch (/, /about, /docs, /blog, /careers)
        │
        ▼
-LLM Structured Extraction (Gemini)
+HTML Sanitization (Cheerio)
        │
        ▼
-Runtime Validation (Zod)
+AI Structured Extraction (Gemini 2.5 Flash)
        │
        ▼
-Cache Store → Response → UI
+Schema Validation (Zod)
+       │
+       ▼
+Cache Store → JSON Response → UI Display
 ```
 
-**Expected Latency:**
+**Key design decisions:**
 
-- First-time enrichment: 4–10 seconds (LLM dependent)
-- Cached enrichment: <100ms
-
----
-
-## Enrichment Scope
-
-The enrichment engine operates under strict, intentional scope control:
-
-- Only the official website provided in the company record is scraped
-- Paths attempted sequentially: `/`, `/about`, `/doc`, `/docs`, `/blog`, `/careers`
-- Maximum 4 pages scraped per request
-- Maximum 12,000 characters of text sent to the LLM
-- No external feeds, no GitHub, no social media scraping
-- No headless browser — direct HTTP fetch only
-
-This is intentional MVP scope control, not an oversight.
+- All enrichment runs server-side — API keys are never exposed to the browser
+- Only official, public website HTML is fetched — no access controls are bypassed
+- A fallback crawl strategy attempts multiple paths (`/`, `/about`, `/docs`, `/blog`, `/careers`) to handle sites where the homepage alone may not contain enough content
+- Pages with fewer than 300 readable characters are recorded but excluded from analysis
 
 ---
 
-## Source Transparency
+## Tech Stack
 
-The API returns a `sources` array documenting every attempted URL, whether it succeeded or failed.
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| Icons | Lucide React |
+| Backend | Next.js API Routes (Serverless) |
+| HTML Parsing | Cheerio |
+| AI Extraction | Google Gemini 2.5 Flash (`@google/genai`) |
+| Validation | Zod |
+| Persistence | localStorage |
+| Deployment | Vercel |
 
-```json
-{
-  "url": "https://example.com/about",
-  "status": 404,
-  "success": false,
-  "timestamp": "2025-02-25T17:00:00.000Z"
-}
+---
+
+## Security Considerations
+
+- **API keys** are stored server-side only and never included in the client bundle
+- **Only public data** is used — the scraper fetches standard HTML over HTTP/HTTPS
+- **No access control bypass** — robots.txt-protected or login-gated content is not accessed
+- **SSRF protection** blocks requests to private IPs and cloud metadata endpoints
+- **Cross-domain redirects** are blocked to prevent data poisoning
+- **Rate limiting** (5 req/min per IP) prevents abuse
+
+---
+
+## Setup Instructions
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/LavKumarShakya/VC-Intelligence.git
+cd VC-Intelligence
 ```
 
-| Field | Description |
-|---|---|
-| `url` | The exact URL that was fetched |
-| `status` | HTTP status code returned (200, 404, 403, etc.) |
-| `success` | `true` only if fetch succeeded AND extracted text exceeded 300 characters |
-| `timestamp` | ISO timestamp of the fetch attempt |
+### 2. Install dependencies
 
-**Key distinctions:**
+```bash
+npm install
+```
 
-- A page returning `200 OK` but containing less than 300 readable characters is marked `success: false` — it was fetched but not analytically useful
-- Failed pages (404, 403, timeout) are recorded with their status code
-- Only pages marked `success: true` contribute text to the LLM prompt
-
----
-
-## Security
-
-| Protection | Implementation |
-|---|---|
-| SSRF Prevention | Blocks private IPs (`10.x`, `192.168.x`, `127.0.0.1`, `169.254.169.254`, `::1`, cloud metadata endpoints) |
-| Protocol Enforcement | Only `http:` and `https:` allowed |
-| Redirect Policy | Same registrable domain only. Subdomains and `www` normalization allowed. HTTP→HTTPS upgrades allowed. Cross-domain redirects blocked. |
-| API Key Isolation | `GEMINI_API_KEY` stays server-side only, never prefixed with `NEXT_PUBLIC_` |
-| Output Sanitization | All LLM output passes through Zod schema validation before reaching the client |
-
----
-
-## Rate Limiting
-
-- In-memory rate limiter using a `Map<string, number[]>`
-- **5 requests per minute per IP address**
-- Instance-local (not distributed across serverless nodes)
-- Resets on server restart
-
-Suitable for MVP and demo environments. Production deployments would require a distributed store like Redis.
-
----
-
-## Caching
-
-- In-memory cache using a `Map<string, CacheEntry>`
-- Keyed by normalized website URL
-- TTL: **10 minutes**
-- Reduces redundant LLM calls and improves response time for repeated requests
-
-**Rate limiting is enforced before cache lookup.** Cached requests still consume one of the 5 allowed requests per minute. This is an intentional defense-in-depth decision.
-
----
-
-## Error Handling
-
-| Status Code | Meaning | Trigger |
-|---|---|---|
-| `400` | Invalid input | Malformed URL, missing company ID, or SSRF-blocked address |
-| `429` | Rate limited | More than 5 requests per minute from the same IP |
-| `500` | Internal failure | JSON parse error, Zod schema validation failure, or non-retriable LLM error |
-| `502` | Upstream failure | LLM service unavailable after retry, or insufficient content (less than 300 readable characters extracted across all paths) |
-
-**Retry logic:**
-
-- A single retry with 500ms delay is attempted only on network timeouts or 5xx LLM errors
-- No retries on 4xx errors, malformed JSON, or schema validation failures (these are deterministic)
-
----
-
-## Environment Setup
+### 3. Configure environment variables
 
 Create a `.env.local` file in the project root:
 
 ```env
-GEMINI_API_KEY=your_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-This key is read server-side via `process.env.GEMINI_API_KEY`. It is never exposed to the browser. It is required for the `/api/enrich` endpoint to function.
+> The API key is read server-side only and is required for the enrichment endpoint.
 
----
-
-## Local Development
+### 4. Run locally
 
 ```bash
-npm install
 npm run dev
 ```
 
-Access the application at `http://localhost:3000`.
+Access the application at `http://localhost:3000`
 
----
-
-## Build Verification
+### 5. Build for production
 
 ```bash
 npm run build
 ```
 
-The production build compiles with zero TypeScript errors.
+---
+
+## Screenshots
+
+### Company Discovery
+![alt text](MVP-Img/Img1.png)
+
+### Company Profile without Enrichment
+![alt text](MVP-Img/Img2.png)      
+
+### Company Profile with Enrichment
+![alt text](MVP-Img/Img3.png)
+
+### Lists Management
+![alt text](MVP-Img/Img4.png)
+
+### Saved Searches
+![alt text](MVP-Img/Img5.png)
 
 ---
 
-## Design Tradeoffs
+## Repository Structure
 
-| Decision | Reasoning |
-|---|---|
-| In-memory cache and rate limiter | Avoids external infrastructure (Redis) for MVP simplicity |
-| No headless browser | Direct HTTP fetch is faster, lighter, and sufficient for static HTML sites |
-| No distributed cache | Single-node architecture is adequate for the target scope |
-| Synchronous enrichment | No background queue — the request holds the connection open while the LLM processes |
-| LLM-based extraction | Dynamically interprets arbitrary website structures instead of relying on brittle, site-specific HTML selectors |
-| localStorage for persistence | Avoids database setup overhead for an MVP demo |
+```
+VC-Intelligence/
+├── src/
+│   ├── app/
+│   │   ├── api/enrich/       # Enrichment API route
+│   │   ├── companies/        # Company list + profile pages
+│   │   ├── lists/            # Lists management page
+│   │   ├── saved/            # Saved searches page
+│   │   └── layout.tsx        # Root layout with AppShell
+│   ├── components/
+│   │   ├── companies/        # CompanyTable, CompanyHeader, EnrichmentSection
+│   │   ├── layout/           # AppShell, Sidebar, Topbar
+│   │   └── ui/               # Button, Badge, Toast, Skeleton
+│   ├── data/
+│   │   └── mockCompanies.ts  # Mock company dataset
+│   ├── lib/
+│   │   ├── server/           # scraper, extractor, validator, security
+│   │   ├── storage.ts        # localStorage utility
+│   │   └── utils.ts          # Shared helpers
+│   └── types/                # TypeScript interfaces
+├── .env.local                # Environment variables (gitignored)
+├── tailwind.config.ts
+├── next.config.ts
+└── package.json
+```
 
 ---
 
-## Known Limitations
+## Future Improvements
 
-- Cannot scrape JavaScript-heavy SPAs that do not render static HTML
-- In-memory cache and rate limiter reset on server restart or cold start
-- Rate limiter is not horizontally scalable across multiple serverless instances
-- LLM extraction quality depends on the upstream model — occasional hallucination is possible despite strict prompting
-- localStorage data is device-local and does not sync across browsers
+These are architectural stretch goals outside the scope of this assignment:
+
+- **Queue-based enrichment** — Background processing with progress indicators via WebSocket
+- **Signal scoring** — Weighted scoring model to rank companies by investment potential
+- **Vector similarity search** — Semantic search using embeddings for "find companies like X"
+- **CRM integrations** — Export enriched profiles to HubSpot, Salesforce, or Notion
+- **Persistent storage** — Replace localStorage with PostgreSQL for multi-device access
+- **Authentication** — User accounts with role-based permissions
 
 ---
 
-## Future Improvements (Out of Scope)
-
-These are architectural stretch goals not implemented in the current MVP:
-
-- Persistent database storage (PostgreSQL/Redis) for user accounts and enrichment history
-- Queue-based background enrichment with WebSocket progress updates
-- GitHub and external API signal ingestion
-- Vector similarity search for semantic company discovery
-- Authenticated user sessions with role-based access control
-- Distributed rate limiting and caching via Redis
+> This project focuses on shipping a usable product workflow with safe real-time enrichment under an 8-hour constraint.
