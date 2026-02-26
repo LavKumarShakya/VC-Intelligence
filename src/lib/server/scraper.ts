@@ -2,7 +2,7 @@ import * as cheerio from "cheerio";
 import { ERROR_MESSAGES, EnrichmentSource } from "@/types/enrichment";
 
 // Exit boundaries
-const MAX_PAGES_TO_SCRAPE = 3;
+const MAX_PAGES_TO_SCRAPE = 4;
 const MAX_TOTAL_CHARS = 12000;
 const TIMEOUT_MS = 5000; // 5s per page per requirements
 const MIN_CONTENT_CHARS = 500;
@@ -16,8 +16,8 @@ export async function scrapeCompanyWebsite(website: string): Promise<ScraperResu
     const originalUrl = new URL(website.startsWith("http") ? website : `https://${website}`);
     const originalHostname = originalUrl.hostname;
 
-    // Prioritized paths: homepage -> about -> blog -> careers
-    const paths = ["", "/about", "/blog", "/careers"];
+    // Prioritized paths: homepage -> about -> docs -> blog -> careers
+    const paths = ["", "/about", "/docs", "/blog", "/careers"];
     let combinedText = "";
     let pagesScraped = 0;
     const sources: EnrichmentSource[] = [];

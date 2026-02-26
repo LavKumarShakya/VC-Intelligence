@@ -50,17 +50,18 @@ async function executeExtraction(text: string, website: string, sources: Enrichm
     Analyze the following scraped website content for the company at ${website}.
     Extract the intelligence into strict structured JSON.
     
-    CRITICAL INSTRUCTION:
-    - You MUST base all extracted intelligence ONLY on the provided scraped content below.
-    - DO NOT hallucinate.
-    - DO NOT pull information from outside sources (no GitHub, Twitter, news, or funding databases that are not explicitly stated in the text).
+    CRITICAL RULES:
+    - Base ALL output ONLY on the provided scraped content below.
+    - DO NOT hallucinate or infer from external knowledge.
+    - DO NOT include marketing copy, taglines, or filler text.
+    - Be concise. Brevity is mandatory.
     
-    Rules for extraction:
-    - summary: A crisp 1-2 sentence pitch of the company based ONLY on the text.
-    - whatTheyDo: An array of 2-5 bullet points detailing specific capabilities or products mentioned in the text.
-    - keywords: An array of 3-7 tags (e.g. "Fintech", "Series A", "B2B SaaS") explicitly supported by the text.
-    - signals: An array of business indicators found. Examples: "Active hiring page detected" if /careers was scraped, "Security compliance detected" if compliance page was scraped. DO NOT infer signals from general knowledge.
-    - sources: Use Exactly the following JSON array of sources exactly as provided, do not infer sources: ${JSON.stringify(sources)}
+    STRICT OUTPUT LIMITS:
+    - summary: Exactly 1-2 sentences. Maximum 30 words total. State what the company does and for whom.
+    - whatTheyDo: Exactly 3 bullet points. Each bullet must be 1 sentence, maximum 15 words. No sub-points.
+    - keywords: Exactly 3-5 single-word or two-word tags. Examples: "Fintech", "B2B SaaS", "DevTools". No sentences.
+    - signals: Maximum 3 items. Only include if explicitly evidenced in the text. Examples: "Active careers page detected", "Enterprise customer logos present". Do NOT list product features as signals.
+    - sources: Return EXACTLY this array, unchanged: ${JSON.stringify(sources)}
 
     Content to analyze:
     """

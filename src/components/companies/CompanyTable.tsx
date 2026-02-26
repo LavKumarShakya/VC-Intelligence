@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { type Company } from "@/types";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { ChevronUp, ChevronDown, Plus, ExternalLink, Activity } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { StorageUtility } from "@/lib/storage";
 
 type SortField = "name" | "industry" | "stage" | "signalsCount" | "lastEnriched";
 type SortDirection = "asc" | "desc";
@@ -20,7 +21,24 @@ export function CompanyTable({ companies, onSaveCompany }: CompanyTableProps) {
     const [sortField, setSortField] = useState<SortField>("name");
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
     const [currentPage, setCurrentPage] = useState(1);
+    const [enrichedDates, setEnrichedDates] = useState<Record<string, string | null>>({});
     const itemsPerPage = 8;
+
+    // Check localStorage for enrichment timestamps
+    useEffect(() => {
+        const dates: Record<string, string | null> = {};
+        companies.forEach((company) => {
+            const cached = StorageUtility.getItem<any>(`vc-enrichment-${company.id}`);
+            if (cached) {
+                // Use the first successful source timestamp, or current time
+                const sourceTimestamp = cached.sources?.find((s: any) => s.success)?.timestamp;
+                dates[company.id] = sourceTimestamp || new Date().toISOString();
+            } else {
+                dates[company.id] = company.lastEnriched;
+            }
+        });
+        setEnrichedDates(dates);
+    }, [companies]);
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -45,8 +63,8 @@ export function CompanyTable({ companies, onSaveCompany }: CompanyTableProps) {
         if (sortField === "signalsCount") {
             comparison = a.signalsCount - b.signalsCount;
         } else if (sortField === "lastEnriched") {
-            const dateA = a.lastEnriched ? new Date(a.lastEnriched).getTime() : 0;
-            const dateB = b.lastEnriched ? new Date(b.lastEnriched).getTime() : 0;
+            const dateA = enrichedDates[a.id] ? new Date(enrichedDates[a.id]!).getTime() : 0;
+            const dateB = enrichedDates[b.id] ? new Date(enrichedDates[b.id]!).getTime() : 0;
             comparison = dateA - dateB;
         } else {
             comparison = String(a[sortField]).localeCompare(String(b[sortField]));
@@ -137,10 +155,10 @@ export function CompanyTable({ companies, onSaveCompany }: CompanyTableProps) {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-right text-text-muted text-xs">
-                                    {company.lastEnriched ? formatDate(company.lastEnriched) : "Never"}
+                                    {enrichedDates[company.id] ? formatDate(enrichedDates[company.id]!) : "Never"}
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                                         <Button
                                             variant="secondary"
                                             size="sm"
